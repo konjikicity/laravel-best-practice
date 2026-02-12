@@ -3,7 +3,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "slidev build --no-export",
+    "build": "slidev build",
     "dev": "slidev --open",
     "export": "slidev export"
   },
@@ -15,7 +15,6 @@
     "vue": "^3.5.0"
   },
   "devDependencies": {
-    "@iconify-json/logos": "^1.2.10",
-    "playwright-chromium": "^1.40.0"
+    "@iconify-json/logos": "^1.2.10"
   }
 }
