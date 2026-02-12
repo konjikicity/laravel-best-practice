@@ -25,6 +25,21 @@ fonts:
 受託ナレッジシェア by Ond
 </p>
 
+
+---
+transition: fade-out
+---
+
+<h1 class="font-bold">今日のテーマ</h1>
+
+<div class="flex items-center gap-8">
+<div>
+<h2 class="py-12 font-bold text-red">明日から使える！</h2>
+<h3>言葉の通り明日からすぐ意識・使えます。</h3>
+</div>
+<img src="/maji.jpeg" class="mt-6 w-70 rounded" />
+</div>
+
 ---
 transition: fade-out
 ---
@@ -186,6 +201,7 @@ transition: fade-out
 <p>Bad</p>
 
 ```php
+// メソッドの中でDBに関するロジックを書いてる
 public function index()
 {
     $clients = Client::verified()
@@ -204,6 +220,8 @@ public function index()
 <p>Good</p>
 
 ```php
+
+// Eloquentのモデルからメソッド使用
 public function index()
 {
     return view('index', ['clients' => $this->client->getWithNewOrders()]);
@@ -238,6 +256,7 @@ transition: fade-out
 <p>Bad</p>
 
 ```php
+// メソッドの中でバリデーションしてる。
 public function store(Request $request)
 {
     $request->validate([
@@ -256,11 +275,13 @@ public function store(Request $request)
 <p>Good</p>
 
 ```php
+// 独自のRequestクラスを型定義
 public function store(PostRequest $request)
 {
     ...
 }
 
+// Requestクラスを継承したPostRequestクラスを定義
 class PostRequest extends Request
 {
     public function rules()
@@ -290,6 +311,7 @@ transition: fade-out
 <p>Bad</p>
 
 ```php
+// コントローラーのメソッドにアップロードする処理まで書いている。
 public function store(Request $request)
 {
     if ($request->hasFile('image')) {
@@ -306,6 +328,8 @@ public function store(Request $request)
 <p>Good</p>
 
 ```php
+
+// コントローラーには何をするかを書く
 public function store(Request $request)
 {
     $this->articleService->handleUploadedImage($request->file('image'));
@@ -313,6 +337,7 @@ public function store(Request $request)
     ...
 }
 
+// サービスにビジネスロジックを書く(保存・削除等)
 class ArticleService
 {
     public function handleUploadedImage($image)
@@ -340,6 +365,8 @@ transition: fade-out
 <p>Bad</p>
 
 ```php
+
+// どちらもActiveのユーザーを対象にしている
 public function getActive()
 {
     return $this->where('verified', 1)
@@ -361,6 +388,8 @@ public function getArticles()
 <p>Good</p>
 
 ```php
+
+// Activeのユーザーのみのスコープを定義
 public function scopeActive($q)
 {
     return $q->where('verified', 1)
@@ -416,15 +445,16 @@ ORDER BY `created_at` DESC
 <p>Good（Eloquent）</p>
 
 ```php
+// モデルにscopeを使ったメソッド
 Article::has('user.profile')
     ->verified()
     ->latest()
     ->get();
 ```
 
+</div>
+</div>
 <p class="pt-4 text-sm">Eloquentには論理削除、イベント、スコープなどの優れた組み込みツールがある</p>
-</div>
-</div>
 
 ---
 transition: fade-out
@@ -454,12 +484,24 @@ $article->save();
 <p>Good</p>
 
 ```php
+// マスアサインメントで一気に指定できる。
 $category->article()->create($request->validated());
 ```
 
+```php
+// ただfillableを指定することは大事
+protected $fillable  = [
+  'title',
+  'content',
+  'verified',
+  'category_id'
+];
+
+```
+
+</div>
+</div>
 <p class="pt-4 text-sm">リレーションメソッドと$request->validated()を組み合わせることで、安全かつ簡潔に記述できる</p>
-</div>
-</div>
 
 ---
 transition: fade-out
@@ -475,6 +517,7 @@ transition: fade-out
 <p>Bad（100ユーザに対して101回のDBクエリ）</p>
 
 ```blade
+//User::all()で全員取得した後、userのプロフィール取得を実行　1 + 100
 @foreach (User::all() as $user)
     {{ $user->profile->name }}
 @endforeach
@@ -486,10 +529,12 @@ transition: fade-out
 <p>Good（100ユーザに対して2回のDBクエリ）</p>
 
 ```php
+// withを使用してEagerload　User::all()とWHERE INでprofileを取得の2回
 $users = User::with('profile')->get();
 ```
 
 ```blade
+<!-- viewでクエリは実行せずに表示だけ -->
 @foreach ($users as $user)
     {{ $user->profile->name }}
 @endforeach
@@ -694,7 +739,6 @@ $user = new User;
 $user->create($request->validated());
 ```
 
-<p class="pt-4 text-sm">newはクラス間の密結合を生み出し、テストを難しくする</p>
 </div>
 
 <div class="w-1/2 p-2">
@@ -713,6 +757,8 @@ $this->user->create($request->validated());
 ```
 </div>
 </div>
+<p class="pt-4 text-sm">newはクラス間の密結合を生み出し、テストを難しくする</p>
+<p class="pt-4 text-sm">例) 「キャンペーン期間中だけ割引する」という機能をテストしたいのに、<br>テストを実行している「今」が期間外だとテストが失敗する。</p>
 
 ---
 transition: fade-out
@@ -746,7 +792,7 @@ $apiKey = config('api.key');
 </div>
 </div>
 
-<p class="pt-4">config:cacheを使用した場合、env()は動作しなくなるため</p>
+<p class="pt-4">config:cacheを使用した場合、本番環境でenv()は動作しなくなるため</p>
 
 ---
 transition: fade-out
@@ -848,81 +894,23 @@ transition: fade-out
 
 - まず動くものを作り、リファクタリングで改善
 
-- 「動く → 正しい → 速い」の順番で進める
-
 - 過度な抽象化は後で苦しむことが多い
 
 </div>
 
----
-transition: fade-out
----
 
-<h1 class="font-bold">3. テストを書く</h1>
-
-<div class="pt-6">
-
-- テストがあると安心してリファクタリングできる
-
-- バグの再発防止になる
-
-- 仕様書代わりにもなる
-
-- 最初は Feature Test から始めると良い
-
-</div>
-
-```php
-public function test_user_can_view_articles()
-{
-    $user = User::factory()->create();
-    $article = Article::factory()->create();
-
-    $response = $this->actingAs($user)->get('/articles');
-
-    $response->assertStatus(200);
-    $response->assertSee($article->title);
-}
-```
 
 ---
 transition: fade-out
 ---
 
-<h1 class="font-bold">4. チームで規約を統一する</h1>
-
-<div class="pt-6">
-
-- コーディング規約を決めて共有する
-
-- Laravel Pintなどのツールでフォーマットを自動化
-
-- レビューで「書き方」ではなく「ロジック」に集中できる
-
-- 新メンバーのオンボーディングも楽になる
-
-</div>
-
-```bash
-# Laravel Pint でコードを自動整形
-./vendor/bin/pint
-```
-
----
-transition: fade-out
----
-
-<h1 class="font-bold">5. エラーログを活用する</h1>
+<h1 class="font-bold">3. エラーログを活用する</h1>
 
 <div class="pt-6">
 
 - `storage/logs/laravel.log` を定期的に確認
 
-- 本番環境では Sentry や Bugsnag などの監視ツールを導入
-
-- エラーが起きたら原因を追求し、根本解決する
-
-- 「とりあえず動いた」で終わらせない
+- 例外発生時のログ仕込み
 
 </div>
 
@@ -930,7 +918,7 @@ transition: fade-out
 transition: fade-out
 ---
 
-<h1 class="font-bold">6. パフォーマンスを意識する</h1>
+<h1 class="font-bold">4. パフォーマンスを意識する</h1>
 
 <div class="pt-6">
 
@@ -965,12 +953,10 @@ transition: fade-out
 <h1 class="font-bold">おわりに</h1>
 <div>
 
-<p class="pt-6">結構なボリュームになってしまいましたが、</p>
 <p>今回の発表で再度、自分も復習できました。</p>
-<p>Laravelは奥が深く、今回紹介したのも一部ですが、</p>
-<p>よく使うベストプラクティスをチョイスしたので、ためになれば幸いです。</p>
+<p>明日からすぐ使えます！</p>
 
-<h3 class="text-red pt-12">あとslidevで作るのはすごく楽しかったです。</h3>
+<h3 class="text-red pt-12">slide by slidev</h3>
 <p class="text-blue">https://ja.sli.dev</p>
 </div>
 
