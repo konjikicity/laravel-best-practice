@@ -486,6 +486,13 @@ $article->save();
 ```php
 // マスアサインメントで一気に指定できる。
 $category->article()->create($request->validated());
+
+->create([
+    'title' => '小野田',
+    'content' => '好きなアイス',
+    'verified' => 1,
+    'category_id' => 1
+]);
 ```
 
 ```php
@@ -541,6 +548,9 @@ $users = User::with('profile')->get();
 ```
 </div>
 </div>
+
+<p>例) Bad: ハンバーガー100個持ってきた後に、ハンバーガー分ポテトをとってくる</p>
+<p>例) Good: ハンバーガー100個持ってきた後に、ポテトを100個とってくる</p>
 
 ---
 transition: fade-out
@@ -746,6 +756,8 @@ $user->create($request->validated());
 <p>Good</p>
 
 ```php
+// Type-hinting (Dependency Injection)
+// Laravelのコンテナが自動でUserをインスタンス化して渡してくれる
 public function __construct(User $user)
 {
     $this->user = $user;
@@ -757,8 +769,6 @@ $this->user->create($request->validated());
 ```
 </div>
 </div>
-<p class="pt-4 text-sm">newはクラス間の密結合を生み出し、テストを難しくする</p>
-<p class="pt-4 text-sm">例) 「キャンペーン期間中だけ割引する」という機能をテストしたいのに、<br>テストを実行している「今」が期間外だとテストが失敗する。</p>
 
 ---
 transition: fade-out
@@ -823,6 +833,7 @@ protected $casts = [
     'ordered_at' => 'datetime',
 ];
 
+// アクセサ
 public function getSomeDateAttribute($date)
 {
     return $date->format('m-d');
@@ -831,6 +842,17 @@ public function getSomeDateAttribute($date)
 // View
 {{ $object->ordered_at->toDateString() }}
 {{ $object->ordered_at->some_date }}
+
+/**
+* パスワードを自動でハッシュ化するミューテーター
+*/
+protected function password(): Attribute
+{
+    return Attribute::make(
+        // set がミューテーターの役割（DBに保存する時の加工）
+        set: fn (string $value) => Hash::make($value)
+    );
+}
 ```
 </div>
 </div>
@@ -866,21 +888,17 @@ layout: center
 transition: fade-out
 ---
 
-<h1 class="font-bold">1. 公式ドキュメントを読む</h1>
+<h1 class="font-bold">1. ドキュメントを読む</h1>
 
 <div class="pt-6">
 
-- Laravelの公式ドキュメントは非常に充実している
-
-- 新機能やベストプラクティスが常に更新されている
-
-- 困ったらまずドキュメントを確認する習慣をつける
-
-- 英語が苦手でも、コード例を見るだけでも参考になる
+- Laravelの公式ドキュメントを翻訳してくれているところがある
+- 久しぶりに見たら結構変わってた。
+- livewireとかも翻訳してくれてる。
 
 </div>
 
-<p class="pt-8 text-blue">https://laravel.com/docs</p>
+<p class="pt-8 text-blue">https://readouble.com/</p>
 
 ---
 transition: fade-out
